@@ -2,10 +2,13 @@ package db;
 
 import javafx.application.Application;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
 import java.sql.*;
@@ -13,35 +16,122 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AdminDashboard extends Application {
+    private Stage primaryStage;  // Store stage reference
 
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("Admin Dashboard");
+        this.primaryStage = primaryStage;
+        primaryStage.setTitle("Admin Dashboard - Online Clothing");
 
+        // Main container with gradient background
         BorderPane root = new BorderPane();
+        root.setStyle("-fx-background-color: linear-gradient(to bottom right, #6B48FF, #00DDEB);");
         root.setPadding(new Insets(20));
 
         // Left panel with buttons
-        VBox leftPanel = new VBox(10);
-        leftPanel.setPadding(new Insets(10));
+        VBox leftPanel = new VBox(15);
+        leftPanel.setPadding(new Insets(20));
+        leftPanel.setStyle("-fx-background-color: rgba(255, 255, 255, 0.95);" +
+                "-fx-border-radius: 15;" +
+                "-fx-background-radius: 15;" +
+                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 15, 0, 0, 5);");
+        leftPanel.setAlignment(Pos.CENTER);
+
+        // Buttons with LoginPage style
         Button addProductButton = new Button("Add Product");
+        addProductButton.setStyle("-fx-background-color: linear-gradient(to right, #6B48FF, #00DDEB);" +
+                "-fx-text-fill: white;" +
+                "-fx-font-size: 16px;" +
+                "-fx-font-weight: bold;" +
+                "-fx-background-radius: 25;" +
+                "-fx-padding: 12 40;" +
+                "-fx-cursor: hand;");
+
+        Button viewProductsButton = new Button("View Products");
+        viewProductsButton.setStyle("-fx-background-color: transparent;" +
+                "-fx-text-fill: #6B48FF;" +
+                "-fx-font-size: 16px;" +
+                "-fx-font-weight: bold;" +
+                "-fx-background-radius: 25;" +
+                "-fx-border-color: #6B48FF;" +
+                "-fx-border-width: 2;" +
+                "-fx-padding: 10 38;" +
+                "-fx-cursor: hand;");
+
         Button viewUsersButton = new Button("View Users");
+        viewUsersButton.setStyle("-fx-background-color: transparent;" +
+                "-fx-text-fill: #6B48FF;" +
+                "-fx-font-size: 16px;" +
+                "-fx-font-weight: bold;" +
+                "-fx-background-radius: 25;" +
+                "-fx-border-color: #6B48FF;" +
+                "-fx-border-width: 2;" +
+                "-fx-padding: 10 38;" +
+                "-fx-cursor: hand;");
+
         Button viewOrderHistoryButton = new Button("View Order History");
-        leftPanel.getChildren().addAll(addProductButton, viewUsersButton, viewOrderHistoryButton);
+        viewOrderHistoryButton.setStyle("-fx-background-color: transparent;" +
+                "-fx-text-fill: #6B48FF;" +
+                "-fx-font-size: 16px;" +
+                "-fx-font-weight: bold;" +
+                "-fx-background-radius: 25;" +
+                "-fx-border-color: #6B48FF;" +
+                "-fx-border-width: 2;" +
+                "-fx-padding: 10 38;" +
+                "-fx-cursor: hand;");
+
+        Button logoutButton = new Button("Logout");
+        logoutButton.setStyle("-fx-background-color: transparent;" +
+                "-fx-text-fill: #6B48FF;" +
+                "-fx-font-size: 16px;" +
+                "-fx-font-weight: bold;" +
+                "-fx-background-radius: 25;" +
+                "-fx-border-color: #6B48FF;" +
+                "-fx-border-width: 2;" +
+                "-fx-padding: 10 38;" +
+                "-fx-cursor: hand;");
+
+        leftPanel.getChildren().addAll(addProductButton, viewProductsButton, viewUsersButton, 
+                                    viewOrderHistoryButton, logoutButton);
 
         // Center panel for content
         StackPane centerPane = new StackPane();
+        centerPane.setPadding(new Insets(20));
+        centerPane.setStyle("-fx-background-color: rgba(255, 255, 255, 0.95);" +
+                "-fx-border-radius: 15;" +
+                "-fx-background-radius: 15;" +
+                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 15, 0, 0, 5);");
+
+        // Initial view
+        Label initialLabel = new Label("Select an option from the left panel");
+        initialLabel.setFont(Font.font("Arial", FontWeight.NORMAL, 16));
+        initialLabel.setStyle("-fx-text-fill: #666666;");
+        centerPane.getChildren().add(initialLabel);
 
         // Button actions
         addProductButton.setOnAction(e -> centerPane.getChildren().setAll(createAddProductPane()));
+        viewProductsButton.setOnAction(e -> centerPane.getChildren().setAll(createProductsPane()));
         viewUsersButton.setOnAction(e -> centerPane.getChildren().setAll(createUsersPane()));
         viewOrderHistoryButton.setOnAction(e -> centerPane.getChildren().setAll(createOrderHistoryPane()));
 
-        // Initial view
-        centerPane.getChildren().add(new Label("Select an option from the left panel"));
+        // Logout button action
+        logoutButton.setOnAction(e -> {
+            GlobalVar.id = 0;
+            showAlert(Alert.AlertType.INFORMATION, "Logout", "Logout successful!");
+            primaryStage.close();
+            try {
+                new LoginPage().start(new Stage());
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                showAlert(Alert.AlertType.ERROR, "Logout Error", 
+                    "Failed to open login page: " + ex.getMessage());
+            }
+        });
 
         root.setLeft(leftPanel);
         root.setCenter(centerPane);
+        BorderPane.setMargin(leftPanel, new Insets(20));
+        BorderPane.setMargin(centerPane, new Insets(20));
 
         Scene scene = new Scene(root, 1000, 600);
         primaryStage.setScene(scene);
@@ -49,43 +139,97 @@ public class AdminDashboard extends Application {
     }
 
     private VBox createAddProductPane() {
-        VBox pane = new VBox(10);
-        pane.setPadding(new Insets(10));
+        VBox pane = new VBox(15);
+        pane.setPadding(new Insets(20));
 
+        // Title with gradient text
         Label title = new Label("Add New Product");
-        title.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+        title.setFont(Font.font("Arial", FontWeight.EXTRA_BOLD, 28));
+        title.setStyle("-fx-text-fill: linear-gradient(to right, #6B48FF, #00DDEB);");
 
         GridPane form = new GridPane();
-        form.setHgap(10);
-        form.setVgap(10);
+        form.setHgap(15);
+        form.setVgap(15);
 
         Label nameLabel = new Label("Name:");
+        nameLabel.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, 14));
+        nameLabel.setStyle("-fx-text-fill: #333333;");
         TextField nameField = new TextField();
+        nameField.setPromptText("Enter product name");
+        nameField.setStyle("-fx-background-radius: 25;" +
+                "-fx-border-radius: 25;" +
+                "-fx-border-color: #6B48FF;" +
+                "-fx-padding: 12;" +
+                "-fx-font-size: 14px;" +
+                "-fx-background-color: #ffffff;");
         form.add(nameLabel, 0, 0);
         form.add(nameField, 1, 0);
 
         Label descLabel = new Label("Description:");
+        descLabel.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, 14));
+        descLabel.setStyle("-fx-text-fill: #333333;");
         TextArea descField = new TextArea();
+        descField.setPromptText("Enter product description");
         descField.setPrefRowCount(3);
+        descField.setStyle("-fx-background-radius: 15;" +
+                "-fx-border-radius: 15;" +
+                "-fx-border-color: #6B48FF;" +
+                "-fx-padding: 10;" +
+                "-fx-font-size: 14px;" +
+                "-fx-background-color: #ffffff;");
         form.add(descLabel, 0, 1);
         form.add(descField, 1, 1);
 
         Label priceLabel = new Label("Price:");
+        priceLabel.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, 14));
+        priceLabel.setStyle("-fx-text-fill: #333333;");
         TextField priceField = new TextField();
+        priceField.setPromptText("Enter price");
+        priceField.setStyle("-fx-background-radius: 25;" +
+                "-fx-border-radius: 25;" +
+                "-fx-border-color: #6B48FF;" +
+                "-fx-padding: 12;" +
+                "-fx-font-size: 14px;" +
+                "-fx-background-color: #ffffff;");
         form.add(priceLabel, 0, 2);
         form.add(priceField, 1, 2);
 
         Label stockLabel = new Label("Stock:");
+        stockLabel.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, 14));
+        stockLabel.setStyle("-fx-text-fill: #333333;");
         TextField stockField = new TextField();
+        stockField.setPromptText("Enter stock quantity");
+        stockField.setStyle("-fx-background-radius: 25;" +
+                "-fx-border-radius: 25;" +
+                "-fx-border-color: #6B48FF;" +
+                "-fx-padding: 12;" +
+                "-fx-font-size: 14px;" +
+                "-fx-background-color: #ffffff;");
         form.add(stockLabel, 0, 3);
         form.add(stockField, 1, 3);
 
         Label imageLabel = new Label("Image URL:");
+        imageLabel.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, 14));
+        imageLabel.setStyle("-fx-text-fill: #333333;");
         TextField imageField = new TextField();
+        imageField.setPromptText("Enter image URL");
+        imageField.setStyle("-fx-background-radius: 25;" +
+                "-fx-border-radius: 25;" +
+                "-fx-border-color: #6B48FF;" +
+                "-fx-padding: 12;" +
+                "-fx-font-size: 14px;" +
+                "-fx-background-color: #ffffff;");
         form.add(imageLabel, 0, 4);
         form.add(imageField, 1, 4);
 
         Button submitButton = new Button("Submit");
+        submitButton.setStyle("-fx-background-color: linear-gradient(to right, #6B48FF, #00DDEB);" +
+                "-fx-text-fill: white;" +
+                "-fx-font-size: 16px;" +
+                "-fx-font-weight: bold;" +
+                "-fx-background-radius: 25;" +
+                "-fx-padding: 12 40;" +
+                "-fx-cursor: hand;");
         submitButton.setOnAction(e -> {
             try {
                 addProduct(nameField.getText(), descField.getText(),
@@ -109,24 +253,73 @@ public class AdminDashboard extends Application {
         return pane;
     }
 
+    private ScrollPane createProductsPane() {
+        TableView<Product> table = new TableView<>();
+        table.setPrefWidth(800);
+        table.setStyle("-fx-background-color: #ffffff;" +
+                "-fx-border-color: #6B48FF;" +
+                "-fx-border-radius: 10;" +
+                "-fx-background-radius: 10;");
+
+        TableColumn<Product, Integer> idCol = new TableColumn<>("ID");
+        idCol.setCellValueFactory(new PropertyValueFactory<>("productId"));
+        idCol.setPrefWidth(80);
+
+        TableColumn<Product, String> nameCol = new TableColumn<>("Name");
+        nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
+        nameCol.setPrefWidth(150);
+
+        TableColumn<Product, String> descCol = new TableColumn<>("Description");
+        descCol.setCellValueFactory(new PropertyValueFactory<>("description"));
+        descCol.setPrefWidth(200);
+
+        TableColumn<Product, Double> priceCol = new TableColumn<>("Price");
+        priceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
+        priceCol.setPrefWidth(100);
+
+        TableColumn<Product, Integer> stockCol = new TableColumn<>("Stock");
+        stockCol.setCellValueFactory(new PropertyValueFactory<>("stock"));
+        stockCol.setPrefWidth(100);
+
+        TableColumn<Product, String> imageUrlCol = new TableColumn<>("Image URL");
+        imageUrlCol.setCellValueFactory(new PropertyValueFactory<>("imageUrl"));
+        imageUrlCol.setPrefWidth(200);
+
+        table.getColumns().addAll(idCol, nameCol, descCol, priceCol, stockCol, imageUrlCol);
+        table.getItems().addAll(fetchProductsFromDatabase());
+
+        ScrollPane scrollPane = new ScrollPane(table);
+        scrollPane.setFitToWidth(true);
+        return scrollPane;
+    }
+
     private ScrollPane createUsersPane() {
         TableView<User> table = new TableView<>();
         table.setPrefWidth(800);
+        table.setStyle("-fx-background-color: #ffffff;" +
+                "-fx-border-color: #6B48FF;" +
+                "-fx-border-radius: 10;" +
+                "-fx-background-radius: 10;");
 
         TableColumn<User, Integer> idCol = new TableColumn<>("ID");
         idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
+        idCol.setPrefWidth(80);
 
         TableColumn<User, String> nameCol = new TableColumn<>("Name");
         nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
+        nameCol.setPrefWidth(150);
 
         TableColumn<User, String> contactCol = new TableColumn<>("Contact");
         contactCol.setCellValueFactory(new PropertyValueFactory<>("contact"));
+        contactCol.setPrefWidth(150);
 
         TableColumn<User, String> emailCol = new TableColumn<>("Email");
         emailCol.setCellValueFactory(new PropertyValueFactory<>("email"));
+        emailCol.setPrefWidth(200);
 
         TableColumn<User, String> roleCol = new TableColumn<>("Role");
         roleCol.setCellValueFactory(new PropertyValueFactory<>("role"));
+        roleCol.setPrefWidth(100);
 
         table.getColumns().addAll(idCol, nameCol, contactCol, emailCol, roleCol);
         table.getItems().addAll(fetchUsersFromDatabase());
@@ -137,9 +330,12 @@ public class AdminDashboard extends Application {
     }
 
     private VBox createOrderHistoryPane() {
-        // TableView for order history
         TableView<OrderItemHistory> table = new TableView<>();
         table.setPrefWidth(800);
+        table.setStyle("-fx-background-color: #ffffff;" +
+                "-fx-border-color: #6B48FF;" +
+                "-fx-border-radius: 10;" +
+                "-fx-background-radius: 10;");
 
         TableColumn<OrderItemHistory, Integer> orderIdCol = new TableColumn<>("Order ID");
         orderIdCol.setCellValueFactory(new PropertyValueFactory<>("orderId"));
@@ -177,19 +373,34 @@ public class AdminDashboard extends Application {
         statusCol.setCellValueFactory(new PropertyValueFactory<>("status"));
         statusCol.setPrefWidth(100);
 
-        table.getColumns().addAll(orderIdCol, customerNameCol, productNameCol, quantityCol, priceCol, totalPriceCol, paymentMethodCol, orderDateCol, statusCol);
+        table.getColumns().addAll(orderIdCol, customerNameCol, productNameCol, quantityCol, priceCol, 
+                                totalPriceCol, paymentMethodCol, orderDateCol, statusCol);
         table.getItems().addAll(fetchOrderHistoryFromDatabase());
 
-        // ComboBox for status selection
         ComboBox<String> statusComboBox = new ComboBox<>();
         statusComboBox.getItems().addAll("Pending", "Shipped", "Delivered", "Cancelled");
         statusComboBox.setPromptText("Change Status");
+        statusComboBox.setStyle("-fx-background-radius: 25;" +
+                "-fx-border-radius: 25;" +
+                "-fx-border-color: #6B48FF;" +
+                "-fx-padding: 5;" +
+                "-fx-font-size: 14px;" +
+                "-fx-background-color: #ffffff;");
 
-        // Button to apply status change
+        Label statusLabel = new Label("Status:");
+        statusLabel.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, 14));
+        statusLabel.setStyle("-fx-text-fill: #333333;");
+
         Button updateStatusButton = new Button("Update Status");
-        updateStatusButton.setDisable(true); // Disabled until an order is selected
+        updateStatusButton.setStyle("-fx-background-color: linear-gradient(to right, #6B48FF, #00DDEB);" +
+                "-fx-text-fill: white;" +
+                "-fx-font-size: 14px;" +
+                "-fx-font-weight: bold;" +
+                "-fx-background-radius: 25;" +
+                "-fx-padding: 10 30;" +
+                "-fx-cursor: hand;");
+        updateStatusButton.setDisable(true);
 
-        // Enable button and set ComboBox value when an order is selected
         table.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
                 updateStatusButton.setDisable(false);
@@ -200,15 +411,13 @@ public class AdminDashboard extends Application {
             }
         });
 
-        // Action to update status in database and TableView
         updateStatusButton.setOnAction(e -> {
             OrderItemHistory selectedOrder = table.getSelectionModel().getSelectedItem();
             String newStatus = statusComboBox.getValue();
             if (selectedOrder != null && newStatus != null && !newStatus.equals(selectedOrder.getStatus())) {
                 try {
                     updateOrderStatus(selectedOrder.getOrderId(), newStatus);
-                    // Update the TableView by refreshing the data
-                    selectedOrder.setStatus(newStatus); // Update the object (requires setter)
+                    selectedOrder.setStatus(newStatus);
                     table.refresh();
                     showAlert(Alert.AlertType.INFORMATION, "Success", "Order status updated to " + newStatus);
                 } catch (SQLException ex) {
@@ -219,12 +428,12 @@ public class AdminDashboard extends Application {
             }
         });
 
-        // Layout for table and status controls
-        VBox pane = new VBox(10);
-        pane.setPadding(new Insets(10));
+        VBox pane = new VBox(15);
+        pane.setPadding(new Insets(20));
         ScrollPane scrollPane = new ScrollPane(table);
         scrollPane.setFitToWidth(true);
-        HBox statusControls = new HBox(10, new Label("Status:"), statusComboBox, updateStatusButton);
+        HBox statusControls = new HBox(15, statusLabel, statusComboBox, updateStatusButton);
+        statusControls.setAlignment(Pos.CENTER_LEFT);
         pane.getChildren().addAll(scrollPane, statusControls);
 
         return pane;
@@ -241,6 +450,29 @@ public class AdminDashboard extends Application {
             stmt.setString(5, imageUrl);
             stmt.executeUpdate();
         }
+    }
+
+    private List<Product> fetchProductsFromDatabase() {
+        List<Product> products = new ArrayList<>();
+        try (Connection connection = DatabaseConfig.getInstance().getConnection()) {
+            String sql = "SELECT product_id, name, description, price, stock, image_url FROM Products";
+            PreparedStatement stmt = connection.prepareStatement(sql);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                products.add(new Product(
+                    rs.getInt("product_id"),
+                    rs.getString("name"),
+                    rs.getString("description"),
+                    rs.getDouble("price"),
+                    rs.getInt("stock"),
+                    rs.getString("image_url")
+                ));
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Database Error", "Could not fetch products: " + ex.getMessage());
+        }
+        return products;
     }
 
     private List<User> fetchUsersFromDatabase() {
@@ -320,7 +552,31 @@ public class AdminDashboard extends Application {
         launch(args);
     }
 
-    // Static nested class for User
+    public static class Product {
+        private int productId;
+        private String name;
+        private String description;
+        private double price;
+        private int stock;
+        private String imageUrl;
+
+        public Product(int productId, String name, String description, double price, int stock, String imageUrl) {
+            this.productId = productId;
+            this.name = name;
+            this.description = description;
+            this.price = price;
+            this.stock = stock;
+            this.imageUrl = imageUrl;
+        }
+
+        public int getProductId() { return productId; }
+        public String getName() { return name; }
+        public String getDescription() { return description; }
+        public double getPrice() { return price; }
+        public int getStock() { return stock; }
+        public String getImageUrl() { return imageUrl; }
+    }
+
     public static class User {
         private int id;
         private String name;
@@ -343,7 +599,6 @@ public class AdminDashboard extends Application {
         public String getRole() { return role; }
     }
 
-    // Static nested class for OrderItemHistory with setter for status
     public static class OrderItemHistory {
         private int orderId;
         private String customerName;
@@ -377,6 +632,6 @@ public class AdminDashboard extends Application {
         public String getPaymentMethod() { return paymentMethod; }
         public Timestamp getOrderDate() { return orderDate; }
         public String getStatus() { return status; }
-        public void setStatus(String status) { this.status = status; } // Added setter for status
+        public void setStatus(String status) { this.status = status; }
     }
 }
