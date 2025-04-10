@@ -2,11 +2,15 @@ package db;
 
 import javafx.application.Application;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.effect.BlendMode;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
+import javafx.scene.layout.*;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -16,63 +20,187 @@ public class CustomerSignup extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("Customer Signup");
+        primaryStage.setTitle("Online Clothing - Sign Up");
 
-        GridPane grid = new GridPane();
-        grid.setPadding(new Insets(20));
-        grid.setVgap(10);
-        grid.setHgap(8);
+        // Main container with gradient background
+        BorderPane root = new BorderPane();
+        root.setStyle("-fx-background-color: linear-gradient(to bottom right, #6B48FF, #00DDEB);");
 
-        // Logo Image
+        // Center panel with subtle transparency
+        VBox centerPanel = new VBox(25);
+        centerPanel.setMaxWidth(450);
+        centerPanel.setMaxHeight(600); // Set a max height to prevent stretching
+        centerPanel.setPadding(new Insets(40));
+        centerPanel.setStyle("-fx-background-color: rgba(255, 255, 255, 0.95);" +
+                           "-fx-border-radius: 15;" +
+                           "-fx-background-radius: 15;" +
+                           "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 15, 0, 0, 5);");
+
+        // Logo
         Image logoImage = new Image("file:/Users/saishtiwari/Documents/logo.png");
         ImageView logoImageView = new ImageView(logoImage);
-        logoImageView.setFitWidth(150);
-        logoImageView.setPreserveRatio(true);
-        GridPane.setConstraints(logoImageView, 0, 0, 2, 1);
+        logoImageView.setFitHeight(60);
+        logoImageView.setFitWidth(60);
+        logoImageView.setBlendMode(BlendMode.SRC_ATOP);
 
-        // Name Input
+        // Title
+        Label titleLabel = new Label("Create Account");
+        titleLabel.setFont(Font.font("Arial", FontWeight.EXTRA_BOLD, 28));
+        titleLabel.setStyle("-fx-text-fill: linear-gradient(to right, #6B48FF, #00DDEB);");
+
+        // Subtitle
+        Label subtitleLabel = new Label("Join Online Clothing");
+        subtitleLabel.setFont(Font.font("Arial", FontWeight.NORMAL, 14));
+        subtitleLabel.setStyle("-fx-text-fill: #666666;");
+
+        // Form grid
+        GridPane formGrid = new GridPane();
+        formGrid.setVgap(20);
+        formGrid.setHgap(10);
+
+        // Name
         Label nameLabel = new Label("Name:");
-        GridPane.setConstraints(nameLabel, 0, 1);
+        nameLabel.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, 14));
+        nameLabel.setStyle("-fx-text-fill: #333333;");
         TextField nameInput = new TextField();
         nameInput.setPromptText("Full Name");
-        GridPane.setConstraints(nameInput, 1, 1);
+        nameInput.setStyle("-fx-background-radius: 25;" +
+                         "-fx-border-radius: 25;" +
+                         "-fx-border-color: #6B48FF;" +
+                         "-fx-padding: 12;" +
+                         "-fx-font-size: 14px;" +
+                         "-fx-background-color: #ffffff;");
+        GridPane.setConstraints(nameLabel, 0, 0);
+        GridPane.setConstraints(nameInput, 0, 1);
 
-        // Contact Input
+        // Contact
         Label contactLabel = new Label("Contact Number:");
-        GridPane.setConstraints(contactLabel, 0, 2);
+        contactLabel.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, 14));
+        contactLabel.setStyle("-fx-text-fill: #333333;");
         TextField contactInput = new TextField();
         contactInput.setPromptText("Contact Number");
-        GridPane.setConstraints(contactInput, 1, 2);
+        contactInput.setStyle("-fx-background-radius: 25;" +
+                            "-fx-border-radius: 25;" +
+                            "-fx-border-color: #6B48FF;" +
+                            "-fx-padding: 12;" +
+                            "-fx-font-size: 14px;" +
+                            "-fx-background-color: #ffffff;");
+        GridPane.setConstraints(contactLabel, 0, 2);
+        GridPane.setConstraints(contactInput, 0, 3);
 
-        // Email Input
+        // Email
         Label emailLabel = new Label("Email:");
-        GridPane.setConstraints(emailLabel, 0, 3);
+        emailLabel.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, 14));
+        emailLabel.setStyle("-fx-text-fill: #333333;");
         TextField emailInput = new TextField();
         emailInput.setPromptText("Email");
-        GridPane.setConstraints(emailInput, 1, 3);
+        emailInput.setStyle("-fx-background-radius: 25;" +
+                          "-fx-border-radius: 25;" +
+                          "-fx-border-color: #6B48FF;" +
+                          "-fx-padding: 12;" +
+                          "-fx-font-size: 14px;" +
+                          "-fx-background-color: #ffffff;");
+        GridPane.setConstraints(emailLabel, 0, 4);
+        GridPane.setConstraints(emailInput, 0, 5);
 
-        // Password Input
+        // Password
         Label passwordLabel = new Label("Password:");
-        GridPane.setConstraints(passwordLabel, 0, 4);
+        passwordLabel.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, 14));
+        passwordLabel.setStyle("-fx-text-fill: #333333;");
         PasswordField passwordInput = new PasswordField();
         passwordInput.setPromptText("Password");
-        GridPane.setConstraints(passwordInput, 1, 4);
+        passwordInput.setStyle("-fx-background-radius: 25;" +
+                             "-fx-border-radius: 25;" +
+                             "-fx-border-color: #6B48FF;" +
+                             "-fx-padding: 12;" +
+                             "-fx-font-size: 14px;" +
+                             "-fx-background-color: #ffffff;");
+        GridPane.setConstraints(passwordLabel, 0, 6);
+        GridPane.setConstraints(passwordInput, 0, 7);
 
-        // Confirm Password Input
+        // Confirm Password
         Label confirmPasswordLabel = new Label("Confirm Password:");
-        GridPane.setConstraints(confirmPasswordLabel, 0, 5);
+        confirmPasswordLabel.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, 14));
+        confirmPasswordLabel.setStyle("-fx-text-fill: #333333;");
         PasswordField confirmPasswordInput = new PasswordField();
         confirmPasswordInput.setPromptText("Confirm Password");
-        GridPane.setConstraints(confirmPasswordInput, 1, 5);
+        confirmPasswordInput.setStyle("-fx-background-radius: 25;" +
+                                   "-fx-border-radius: 25;" +
+                                   "-fx-border-color: #6B48FF;" +
+                                   "-fx-padding: 12;" +
+                                   "-fx-font-size: 14px;" +
+                                   "-fx-background-color: #ffffff;");
+        GridPane.setConstraints(confirmPasswordLabel, 0, 8);
+        GridPane.setConstraints(confirmPasswordInput, 0, 9);
 
-        // Register Button
+        formGrid.getChildren().addAll(nameLabel, nameInput, contactLabel, contactInput, 
+                                    emailLabel, emailInput, passwordLabel, passwordInput, 
+                                    confirmPasswordLabel, confirmPasswordInput);
+
+        // Buttons HBox
+        HBox buttonBox = new HBox(15);
+        buttonBox.setAlignment(Pos.CENTER);
+
         Button registerButton = new Button("Register");
-        GridPane.setConstraints(registerButton, 1, 6);
+        registerButton.setStyle("-fx-background-color: linear-gradient(to right, #6B48FF, #00DDEB);" +
+                              "-fx-text-fill: white;" +
+                              "-fx-font-size: 16px;" +
+                              "-fx-font-weight: bold;" +
+                              "-fx-background-radius: 25;" +
+                              "-fx-padding: 12 40;" +
+                              "-fx-cursor: hand;");
 
-        // Back to Login Button
         Button backToLoginButton = new Button("Back to Login");
-        GridPane.setConstraints(backToLoginButton, 0, 6);
+        backToLoginButton.setStyle("-fx-background-color: transparent;" +
+                                 "-fx-text-fill: #6B48FF;" +
+                                 "-fx-font-size: 16px;" +
+                                 "-fx-font-weight: bold;" +
+                                 "-fx-background-radius: 25;" +
+                                 "-fx-border-color: #6B48FF;" +
+                                 "-fx-border-width: 2;" +
+                                 "-fx-padding: 10 38;" +
+                                 "-fx-cursor: hand;");
 
+        // Hover effects
+        registerButton.setOnMouseEntered(e -> registerButton.setStyle("-fx-background-color: linear-gradient(to right, #5A3CE6, #00C4D3);" +
+                                                                    "-fx-text-fill: white;" +
+                                                                    "-fx-font-size: 16px;" +
+                                                                    "-fx-font-weight: bold;" +
+                                                                    "-fx-background-radius: 25;" +
+                                                                    "-fx-padding: 12 40;" +
+                                                                    "-fx-cursor: hand;" +
+                                                                    "-fx-scale-y: 1.05;" +
+                                                                    "-fx-scale-x: 1.05;"));
+        registerButton.setOnMouseExited(e -> registerButton.setStyle("-fx-background-color: linear-gradient(to right, #6B48FF, #00DDEB);" +
+                                                                   "-fx-text-fill: white;" +
+                                                                   "-fx-font-size: 16px;" +
+                                                                   "-fx-font-weight: bold;" +
+                                                                   "-fx-background-radius: 25;" +
+                                                                   "-fx-padding: 12 40;" +
+                                                                   "-fx-cursor: hand;"));
+
+        backToLoginButton.setOnMouseEntered(e -> backToLoginButton.setStyle("-fx-background-color: #6B48FF;" +
+                                                                          "-fx-text-fill: white;" +
+                                                                          "-fx-font-size: 16px;" +
+                                                                          "-fx-font-weight: bold;" +
+                                                                          "-fx-background-radius: 25;" +
+                                                                          "-fx-border-color: #6B48FF;" +
+                                                                          "-fx-border-width: 2;" +
+                                                                          "-fx-padding: 10 38;" +
+                                                                          "-fx-cursor: hand;" +
+                                                                          "-fx-scale-y: 1.05;" +
+                                                                          "-fx-scale-x: 1.05;"));
+        backToLoginButton.setOnMouseExited(e -> backToLoginButton.setStyle("-fx-background-color: transparent;" +
+                                                                         "-fx-text-fill: #6B48FF;" +
+                                                                         "-fx-font-size: 16px;" +
+                                                                         "-fx-font-weight: bold;" +
+                                                                         "-fx-background-radius: 25;" +
+                                                                         "-fx-border-color: #6B48FF;" +
+                                                                         "-fx-border-width: 2;" +
+                                                                         "-fx-padding: 10 38;" +
+                                                                         "-fx-cursor: hand;"));
+
+        // Button actions (unchanged)
         registerButton.setOnAction(e -> {
             String name = nameInput.getText();
             String contact = contactInput.getText();
@@ -100,11 +228,34 @@ public class CustomerSignup extends Application {
             loginPage.start(loginStage);
         });
 
-        grid.getChildren().addAll(logoImageView, nameLabel, nameInput, contactLabel, contactInput, emailLabel, emailInput,
-                passwordLabel, passwordInput, confirmPasswordLabel, confirmPasswordInput, registerButton, backToLoginButton);
+        buttonBox.getChildren().addAll(registerButton, backToLoginButton);
 
-        Scene scene = new Scene(grid, 450, 400);
+        // Assemble center panel
+        centerPanel.getChildren().addAll(logoImageView, titleLabel, subtitleLabel, formGrid, buttonBox);
+        centerPanel.setAlignment(Pos.CENTER);
+
+        // Wrap centerPanel in a StackPane to center it within the ScrollPane
+        StackPane centerWrapper = new StackPane(centerPanel);
+        centerWrapper.setAlignment(Pos.CENTER);
+
+        // ScrollPane for scrollable content
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setFitToWidth(true);
+        scrollPane.setStyle("-fx-background-color: transparent;");
+        scrollPane.setContent(centerWrapper);
+
+        // Add ScrollPane to root
+        root.setCenter(scrollPane);
+        BorderPane.setAlignment(scrollPane, Pos.CENTER);
+        BorderPane.setMargin(scrollPane, new Insets(30));
+
+        // Create the scene
+        Scene scene = new Scene(root, 600, 500);
         primaryStage.setScene(scene);
+
+        // Maximize the window to test full-screen centering
+        primaryStage.setMaximized(true);
+
         primaryStage.show();
     }
 
