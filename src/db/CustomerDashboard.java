@@ -8,6 +8,8 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import java.sql.*;
@@ -26,18 +28,64 @@ public class CustomerDashboard extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("Customer Dashboard");
+        primaryStage.setTitle("Customer Dashboard - Online Clothing");
 
+        // Main container with gradient background
         BorderPane root = new BorderPane();
+        root.setStyle("-fx-background-color: linear-gradient(to bottom right, #6B48FF, #00DDEB);");
         root.setPadding(new Insets(20));
 
-        VBox leftPanel = new VBox(10);
-        leftPanel.setPadding(new Insets(10));
-        Button collectionsButton = new Button("Collections");
-        Button cartButton = new Button("View Cart");
-        leftPanel.getChildren().addAll(collectionsButton, cartButton);
+        // Left panel for buttons with transparency
+        VBox leftPanel = new VBox(15);
+        leftPanel.setPadding(new Insets(20));
+        leftPanel.setStyle("-fx-background-color: rgba(255, 255, 255, 0.95);" +
+                "-fx-border-radius: 15;" +
+                "-fx-background-radius: 15;" +
+                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 15, 0, 0, 5);");
+        leftPanel.setAlignment(Pos.CENTER);
 
+        // Buttons with LoginPage style
+        Button collectionsButton = new Button("Collections");
+        collectionsButton.setStyle("-fx-background-color: linear-gradient(to right, #6B48FF, #00DDEB);" +
+                "-fx-text-fill: white;" +
+                "-fx-font-size: 16px;" +
+                "-fx-font-weight: bold;" +
+                "-fx-background-radius: 25;" +
+                "-fx-padding: 12 40;" +
+                "-fx-cursor: hand;");
+
+        Button cartButton = new Button("View Cart");
+        cartButton.setStyle("-fx-background-color: transparent;" +
+                "-fx-text-fill: #6B48FF;" +
+                "-fx-font-size: 16px;" +
+                "-fx-font-weight: bold;" +
+                "-fx-background-radius: 25;" +
+                "-fx-border-color: #6B48FF;" +
+                "-fx-border-width: 2;" +
+                "-fx-padding: 10 38;" +
+                "-fx-cursor: hand;");
+
+        Button logoutButton = new Button("Logout");
+        logoutButton.setStyle("-fx-background-color: transparent;" +
+                "-fx-text-fill: #6B48FF;" +
+                "-fx-font-size: 16px;" +
+                "-fx-font-weight: bold;" +
+                "-fx-background-radius: 25;" +
+                "-fx-border-color: #6B48FF;" +
+                "-fx-border-width: 2;" +
+                "-fx-padding: 10 38;" +
+                "-fx-cursor: hand;");
+
+        leftPanel.getChildren().addAll(collectionsButton, cartButton, logoutButton);
+
+        // Center panel with transparency
         StackPane centerPane = new StackPane();
+        centerPane.setPadding(new Insets(20));
+        centerPane.setStyle("-fx-background-color: rgba(255, 255, 255, 0.95);" +
+                "-fx-border-radius: 15;" +
+                "-fx-background-radius: 15;" +
+                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 15, 0, 0, 5);");
+
         ScrollPane scrollPane = new ScrollPane(createCollectionsPane());
         scrollPane.setFitToWidth(true);
         cartPane = createCartPane();
@@ -55,8 +103,25 @@ public class CustomerDashboard extends Application {
             centerPane.getChildren().add(cartPane);
         });
 
+        // Logout button action (unchanged)
+        logoutButton.setOnAction(e -> {
+            cartItems.clear();
+            GlobalVar.id = 0;
+            showAlert(Alert.AlertType.INFORMATION, "Logout", "Logout successful!");
+            primaryStage.close();
+            try {
+                new LoginPage().start(new Stage());
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                showAlert(Alert.AlertType.ERROR, "Logout Error", 
+                    "Failed to open login page: " + ex.getMessage());
+            }
+        });
+
         root.setLeft(leftPanel);
         root.setCenter(centerPane);
+        BorderPane.setMargin(leftPanel, new Insets(20));
+        BorderPane.setMargin(centerPane, new Insets(20));
 
         Scene scene = new Scene(root, 900, 700);
         primaryStage.setScene(scene);
@@ -65,30 +130,42 @@ public class CustomerDashboard extends Application {
 
     private VBox createCollectionsPane() {
         VBox pane = new VBox(20);
-        pane.setPadding(new Insets(10));
+        pane.setPadding(new Insets(20));
         pane.setAlignment(Pos.TOP_CENTER);
 
+        // Title with gradient text
         Label title = new Label("Product Collections");
-        title.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+        title.setFont(Font.font("Arial", FontWeight.EXTRA_BOLD, 28));
+        title.setStyle("-fx-text-fill: linear-gradient(to right, #6B48FF, #00DDEB);");
 
         List<Product> products = fetchProductsFromDatabase();
         if (products.isEmpty()) {
             Label noProductsLabel = new Label("No products available. Showing sample items.");
-            noProductsLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: red;");
+            noProductsLabel.setFont(Font.font("Arial", FontWeight.NORMAL, 14));
+            noProductsLabel.setStyle("-fx-text-fill: #666666;");
             products = getDefaultProducts();
             pane.getChildren().add(noProductsLabel);
         }
+
+        // Calculate total price of displayed products
+        double totalPrice = products.stream().mapToDouble(Product::getPrice).sum();
+        Label totalPriceLabel = new Label("Total Price of Products: $" + String.format("%.2f", totalPrice));
+        totalPriceLabel.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, 16));
+        totalPriceLabel.setStyle("-fx-text-fill: #333333;");
 
         GridPane grid = new GridPane();
         grid.setHgap(20);
         grid.setVgap(20);
         int col = 0, row = 0;
         for (Product product : products) {
-            VBox itemFrame = new VBox(10);
-            itemFrame.setPadding(new Insets(10));
-            itemFrame.setStyle("-fx-border-color: gray; -fx-border-width: 1; -fx-background-color: white;");
+            VBox itemFrame = new VBox(15);
+            itemFrame.setPadding(new Insets(15));
+            itemFrame.setStyle("-fx-background-color: rgba(255, 255, 255, 0.95);" +
+                    "-fx-border-radius: 10;" +
+                    "-fx-background-radius: 10;" +
+                    "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 3);");
             itemFrame.setAlignment(Pos.CENTER);
-            itemFrame.setPrefWidth(200);
+            itemFrame.setPrefWidth(250);
 
             ImageView imageView;
             try {
@@ -98,19 +175,32 @@ public class CustomerDashboard extends Application {
             } catch (IllegalArgumentException e) {
                 imageView = new ImageView(new Image("file:/path/to/default.png"));
             }
-            imageView.setFitWidth(150);
-            imageView.setFitHeight(150);
+            imageView.setFitWidth(200);
+            imageView.setFitHeight(200);
             imageView.setPreserveRatio(true);
 
             Label nameLabel = new Label(product.getName());
-            nameLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
+            nameLabel.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, 14));
+            nameLabel.setStyle("-fx-text-fill: #333333;");
+
             Label priceLabel = new Label("$" + String.format("%.2f", product.getPrice()));
-            priceLabel.setStyle("-fx-font-size: 12px;");
+            priceLabel.setFont(Font.font("Arial", FontWeight.NORMAL, 12));
+            priceLabel.setStyle("-fx-text-fill: #666666;");
+
             Label descLabel = new Label(product.getDescription() != null ? product.getDescription() : "No description");
+            descLabel.setFont(Font.font("Arial", FontWeight.NORMAL, 12));
+            descLabel.setStyle("-fx-text-fill: #666666;");
             descLabel.setWrapText(true);
-            descLabel.setMaxWidth(180);
+            descLabel.setMaxWidth(220);
 
             Button addButton = new Button("Add to Cart");
+            addButton.setStyle("-fx-background-color: linear-gradient(to right, #6B48FF, #00DDEB);" +
+                    "-fx-text-fill: white;" +
+                    "-fx-font-size: 14px;" +
+                    "-fx-font-weight: bold;" +
+                    "-fx-background-radius: 25;" +
+                    "-fx-padding: 10 30;" +
+                    "-fx-cursor: hand;");
             addButton.setOnAction(e -> {
                 cartItems.add(new CartItem(product, 1));
                 showAlert(Alert.AlertType.INFORMATION, "Added", product.getName() + " added to cart!");
@@ -125,22 +215,45 @@ public class CustomerDashboard extends Application {
             }
         }
 
-        pane.getChildren().addAll(title, grid);
+        pane.getChildren().addAll(title, totalPriceLabel, grid);
         return pane;
     }
 
     private VBox createCartPane() {
-        VBox pane = new VBox(10);
-        pane.setPadding(new Insets(10));
+        VBox pane = new VBox(15);
+        pane.setPadding(new Insets(20));
 
+        // Title with gradient text
         Label title = new Label("Your Cart");
-        title.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
-        totalPriceLabel = new Label("Total: $0.00");
-        totalPriceLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
+        title.setFont(Font.font("Arial", FontWeight.EXTRA_BOLD, 28));
+        title.setStyle("-fx-text-fill: linear-gradient(to right, #6B48FF, #00DDEB);");
 
-        HBox buttonBox = new HBox(10);
+        totalPriceLabel = new Label("Total: $0.00");
+        totalPriceLabel.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, 16));
+        totalPriceLabel.setStyle("-fx-text-fill: #333333;");
+
+        HBox buttonBox = new HBox(15);
+        buttonBox.setAlignment(Pos.CENTER);
+
         Button buyButton = new Button("Buy");
+        buyButton.setStyle("-fx-background-color: linear-gradient(to right, #6B48FF, #00DDEB);" +
+                "-fx-text-fill: white;" +
+                "-fx-font-size: 16px;" +
+                "-fx-font-weight: bold;" +
+                "-fx-background-radius: 25;" +
+                "-fx-padding: 12 40;" +
+                "-fx-cursor: hand;");
+
         Button cancelButton = new Button("Cancel");
+        cancelButton.setStyle("-fx-background-color: transparent;" +
+                "-fx-text-fill: #6B48FF;" +
+                "-fx-font-size: 16px;" +
+                "-fx-font-weight: bold;" +
+                "-fx-background-radius: 25;" +
+                "-fx-border-color: #6B48FF;" +
+                "-fx-border-width: 2;" +
+                "-fx-padding: 10 38;" +
+                "-fx-cursor: hand;");
 
         buyButton.setOnAction(e -> handleBuyAction());
         cancelButton.setOnAction(e -> {
@@ -156,19 +269,30 @@ public class CustomerDashboard extends Application {
     private void updateCartPane() {
         cartPane.getChildren().clear();
         Label title = new Label("Your Cart");
-        title.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+        title.setFont(Font.font("Arial", FontWeight.EXTRA_BOLD, 28));
+        title.setStyle("-fx-text-fill: linear-gradient(to right, #6B48FF, #00DDEB);");
         cartPane.getChildren().add(title);
 
         if (cartItems.isEmpty()) {
             Label emptyLabel = new Label("Cart is empty.");
-            emptyLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: gray;");
+            emptyLabel.setFont(Font.font("Arial", FontWeight.NORMAL, 14));
+            emptyLabel.setStyle("-fx-text-fill: #666666;");
             cartPane.getChildren().add(emptyLabel);
         } else {
             double totalPrice = 0.0;
             for (CartItem item : cartItems) {
-                HBox itemBox = new HBox(10);
+                HBox itemBox = new HBox(15);
+                itemBox.setAlignment(Pos.CENTER_LEFT);
                 Label itemLabel = new Label(item.getProduct().getName() + " - $" + String.format("%.2f", item.getProduct().getPrice()));
+                itemLabel.setFont(Font.font("Arial", FontWeight.NORMAL, 14));
+                itemLabel.setStyle("-fx-text-fill: #333333;");
                 Spinner<Integer> quantitySpinner = new Spinner<>(1, item.getProduct().getStock(), item.getQuantity());
+                quantitySpinner.setStyle("-fx-background-radius: 25;" +
+                        "-fx-border-radius: 25;" +
+                        "-fx-border-color: #6B48FF;" +
+                        "-fx-padding: 5;" +
+                        "-fx-font-size: 14px;" +
+                        "-fx-background-color: #ffffff;");
                 quantitySpinner.valueProperty().addListener((obs, oldVal, newVal) -> {
                     item.setQuantity(newVal);
                     updateTotalPrice();
@@ -180,9 +304,28 @@ public class CustomerDashboard extends Application {
             totalPriceLabel.setText("Total: $" + String.format("%.2f", totalPrice));
         }
 
-        HBox buttonBox = new HBox(10);
+        HBox buttonBox = new HBox(15);
+        buttonBox.setAlignment(Pos.CENTER);
+
         Button buyButton = new Button("Buy");
+        buyButton.setStyle("-fx-background-color: linear-gradient(to right, #6B48FF, #00DDEB);" +
+                "-fx-text-fill: white;" +
+                "-fx-font-size: 16px;" +
+                "-fx-font-weight: bold;" +
+                "-fx-background-radius: 25;" +
+                "-fx-padding: 12 40;" +
+                "-fx-cursor: hand;");
+
         Button cancelButton = new Button("Cancel");
+        cancelButton.setStyle("-fx-background-color: transparent;" +
+                "-fx-text-fill: #6B48FF;" +
+                "-fx-font-size: 16px;" +
+                "-fx-font-weight: bold;" +
+                "-fx-background-radius: 25;" +
+                "-fx-border-color: #6B48FF;" +
+                "-fx-border-width: 2;" +
+                "-fx-padding: 10 38;" +
+                "-fx-cursor: hand;");
 
         buyButton.setOnAction(e -> handleBuyAction());
         cancelButton.setOnAction(e -> {
@@ -210,12 +353,17 @@ public class CustomerDashboard extends Application {
         paymentStage.initModality(Modality.APPLICATION_MODAL);
         paymentStage.setTitle("Select Payment Method");
 
-        VBox paymentPane = new VBox(10);
-        paymentPane.setPadding(new Insets(10));
+        VBox paymentPane = new VBox(15);
+        paymentPane.setPadding(new Insets(20));
         paymentPane.setAlignment(Pos.CENTER);
+        paymentPane.setStyle("-fx-background-color: rgba(255, 255, 255, 0.95);" +
+                "-fx-border-radius: 15;" +
+                "-fx-background-radius: 15;" +
+                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 15, 0, 0, 5);");
 
         Label paymentLabel = new Label("Choose a Payment Method:");
-        paymentLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+        paymentLabel.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, 16));
+        paymentLabel.setStyle("-fx-text-fill: #333333;");
 
         ToggleGroup paymentGroup = new ToggleGroup();
         RadioButton creditCard = new RadioButton("Credit Card");
@@ -224,9 +372,19 @@ public class CustomerDashboard extends Application {
         creditCard.setToggleGroup(paymentGroup);
         paypal.setToggleGroup(paymentGroup);
         cod.setToggleGroup(paymentGroup);
-        creditCard.setSelected(true); // Default selection
+        creditCard.setSelected(true);
+        creditCard.setStyle("-fx-font-size: 14px; -fx-text-fill: #333333;");
+        paypal.setStyle("-fx-font-size: 14px; -fx-text-fill: #333333;");
+        cod.setStyle("-fx-font-size: 14px; -fx-text-fill: #333333;");
 
         Button confirmButton = new Button("Confirm Payment");
+        confirmButton.setStyle("-fx-background-color: linear-gradient(to right, #6B48FF, #00DDEB);" +
+                "-fx-text-fill: white;" +
+                "-fx-font-size: 16px;" +
+                "-fx-font-weight: bold;" +
+                "-fx-background-radius: 25;" +
+                "-fx-padding: 12 40;" +
+                "-fx-cursor: hand;");
         confirmButton.setOnAction(e -> {
             RadioButton selectedMethod = (RadioButton) paymentGroup.getSelectedToggle();
             if (selectedMethod != null) {
@@ -239,7 +397,8 @@ public class CustomerDashboard extends Application {
         });
 
         paymentPane.getChildren().addAll(paymentLabel, creditCard, paypal, cod, confirmButton);
-        Scene paymentScene = new Scene(paymentPane, 300, 200);
+        Scene paymentScene = new Scene(paymentPane, 300, 250);
+        paymentScene.setFill(javafx.scene.paint.Color.TRANSPARENT);
         paymentStage.setScene(paymentScene);
         paymentStage.showAndWait();
     }
@@ -251,7 +410,7 @@ public class CustomerDashboard extends Application {
             String orderSql = "INSERT INTO Orders (customer_id, total_price, payment_method) VALUES (?, ?, ?)";
             PreparedStatement orderStmt = connection.prepareStatement(orderSql, Statement.RETURN_GENERATED_KEYS);
             double totalPrice = cartItems.stream().mapToDouble(item -> item.getProduct().getPrice() * item.getQuantity()).sum();
-            orderStmt.setInt(1, GlobalVar.id); // Use GlobalVar.id instead of customerId
+            orderStmt.setInt(1, GlobalVar.id);
             orderStmt.setDouble(2, totalPrice);
             orderStmt.setString(3, paymentMethod);
             orderStmt.executeUpdate();
@@ -291,7 +450,7 @@ public class CustomerDashboard extends Application {
             orderDetails.append("Payment Method: ").append(paymentMethod).append("\n");
             for (CartItem item : cartItems) {
                 orderDetails.append(item.getProduct().getName()).append(" - Quantity: ").append(item.getQuantity())
-                            .append(" - Price: $").append(item.getProduct().getPrice() * item.getQuantity()).append("\n");
+                        .append(" - Price: $").append(item.getProduct().getPrice() * item.getQuantity()).append("\n");
             }
             orderDetails.append("Total: $").append(String.format("%.2f", totalPrice));
             System.out.println(orderDetails.toString());
@@ -318,12 +477,12 @@ public class CustomerDashboard extends Application {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 products.add(new Product(
-                    rs.getInt("product_id"),
-                    rs.getString("name"),
-                    rs.getString("description"),
-                    rs.getDouble("price"),
-                    rs.getInt("stock"),
-                    rs.getString("image_url")
+                        rs.getInt("product_id"),
+                        rs.getString("name"),
+                        rs.getString("description"),
+                        rs.getDouble("price"),
+                        rs.getInt("stock"),
+                        rs.getString("image_url")
                 ));
             }
         } catch (SQLException ex) {
@@ -338,12 +497,12 @@ public class CustomerDashboard extends Application {
         String defaultImage = "file:/path/to/default.png";
         for (int i = 1; i <= 20; i++) {
             defaultProducts.add(new Product(
-                -i, // Negative IDs to avoid conflict with database
-                "Sample Item " + i,
-                "Sample description for Item " + i,
-                19.99 + (i * 5.0),
-                50,
-                defaultImage
+                    -i,
+                    "Sample Item " + i,
+                    "Sample description for Item " + i,
+                    19.99 + (i * 5.0),
+                    50,
+                    defaultImage
             ));
         }
         return defaultProducts;
